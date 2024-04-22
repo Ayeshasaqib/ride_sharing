@@ -5,14 +5,14 @@ const categorySchema = new Mongoose.Schema({
     type: String,
     required: true,
   },
-  bookingRequestId: {
-    type: Mongoose.Schema.Types.ObjectId,
-    ref: 'bookingRequest' 
-  },
-  rideId: {
-    type: Mongoose.Schema.Types.ObjectId,
-    ref: 'Ride' // Reference to the 'Ride' collection
-  },
+  // bookingRequestId: {
+  //   type: Mongoose.Schema.Types.ObjectId,
+  //   ref: 'bookingRequest' 
+  // },
+  // rideId: {
+  //   type: Mongoose.Schema.Types.ObjectId,
+  //   ref: 'Ride' // Reference to the 'Ride' collection
+  // },
 });
 
 const category = Mongoose.model('category', categorySchema);

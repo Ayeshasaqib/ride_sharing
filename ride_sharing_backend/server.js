@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const passengerRouter= require('./routes/passenger_router')
 const driverRouter = require('./routes/driver_router')
+const categoryRouter = require('./routes/category_router')
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,7 +23,9 @@ mongoose.connect('mongodb+srv://Ayeshasaqib:Aishashi%40533@atlascluster.02no8pr.
 
 // Routes
 app.use('/passenger',passengerRouter);
-app.use('/driver', driverRouter)
+app.use('/driver', driverRouter);
+app.use('/category',categoryRouter)
+
 
 // Start Server
 app.listen(PORT, () => {
