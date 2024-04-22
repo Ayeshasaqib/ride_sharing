@@ -1,0 +1,43 @@
+// user.js
+const Mongoose = require("mongoose")
+const bcrypt = require('bcrypt');
+const bookingRequestSchema = new Mongoose.Schema({
+
+  fare: {
+    type: Int16Array,
+    required: true,
+  },
+
+  pickupLoc: {
+    
+  },
+  
+   destination:{
+    
+   },
+   passengerId: {
+    type: Mongoose.Schema.Types.ObjectId,
+    ref: 'passenger' 
+
+  },categoryId: {
+    type: Mongoose.Schema.Types.ObjectId,
+    ref: 'category' 
+  },
+  driverOfferId: {
+    type: Mongoose.Schema.Types.ObjectId,
+    ref: 'driverOffer' 
+  },
+
+});
+bookingRequestSchema.pre('save', async function(next) {
+  const bookingRequest = this;
+ 
+  const salt = await bcrypt.genSalt(10);
+  const hash = await bcrypt.hash(bookingRequest.password, salt);
+  
+  bookingRequest.password = hash;
+  next();
+});
+const bookingRequest = Mongoose.model('bookingRequest', bookingRequestSchema);
+
+module.exports = bookingRequest;

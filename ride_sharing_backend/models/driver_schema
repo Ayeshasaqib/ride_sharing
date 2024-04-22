@@ -1,7 +1,7 @@
 // user.js
 const Mongoose = require("mongoose")
 const bcrypt = require('bcrypt');
-const passengerSchema = new Mongoose.Schema({
+const driverSchema = new Mongoose.Schema({
   username: {
     type: String,
     required: true,
@@ -21,24 +21,29 @@ const passengerSchema = new Mongoose.Schema({
     minlength: 6,
     required: true,
   },
-  bookingRequestId: {
+   city:{
+    type : String,
+    required: true,
+   },
+   rideId: {
     type: Mongoose.Schema.Types.ObjectId,
-    ref: 'bookingRequest' // Reference to the 'bookingRequestId' collection
+    ref: 'Ride' // Reference to the 'Ride' collection
   },
+  
   driverOfferId: {
     type: Mongoose.Schema.Types.ObjectId,
     ref: 'driverOffer' 
   }
 });
-passengerSchema.pre('save', async function(next) {
-  const passenger = this;
+driverSchema.pre('save', async function(next) {
+  const driver = this;
  
   const salt = await bcrypt.genSalt(10);
-  const hash = await bcrypt.hash(passenger.password, salt);
+  const hash = await bcrypt.hash(driver.password, salt);
   
-  passenger.password = hash;
+  driver.password = hash;
   next();
 });
-const passenger = Mongoose.model('passenger', passengerSchema);
+const driver = Mongoose.model('driver', driverSchema);
 
-module.exports = passenger;
+module.exports = driver;

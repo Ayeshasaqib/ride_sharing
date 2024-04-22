@@ -1,7 +1,7 @@
 const express= require('express');
 const router= express.Router();
 const bcrypt = require('bcrypt');
-const passenger= require('../models/passenger_schema')
+const passenger= require('../models/passengerr_schema')
 
 //signup
 router.post('/signup',(req,res)=>{

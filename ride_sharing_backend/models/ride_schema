@@ -1,0 +1,28 @@
+// user.js
+const Mongoose = require("mongoose")
+const rideSchema = new Mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  picture: {
+    type: Buffer,
+    required: true
+  },
+  numberPlate: {
+    type: String,
+    required: true,
+  },
+   driverId:{
+    type: Mongoose.Schema.Types.ObjectId,
+    ref: 'driver' // Reference to the 'driver' collection
+   },
+   
+   categoryId: {
+    type: Mongoose.Schema.Types.ObjectId,
+    ref: 'category' // Reference to the 'Ride' collection
+  }
+});
+
+const ride = Mongoose.model('ride', rideSchema);
+module.exports = ride;
