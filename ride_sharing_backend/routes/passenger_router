@@ -1,0 +1,175 @@
+const express= require('express');
+const router= express.Router();
+const bcrypt = require('bcrypt');
+const passenger= require('../models/passenger_schema')
+
+//signup
+router.post('/signup',(req,res)=>{
+
+const nameRegex = /^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const no_format = /^\+?92[\-\s]?\d{3}[\-\s]?\d{7}.*$/;
+
+if (!req.body) {
+    return res.status(400).json({ error: 'Request body is missing' });
+  }
+
+  // Extract properties from req.body
+  const { username,phoneNumber, email, password } = req.body;
+
+  // Check if all required properties exist
+  if (!username || !email || !password || !phoneNumber) {
+    return res.status(400).json({ error: 'Missing required fields in request body' });
+  }
+  else if(!(nameRegex).test(username))
+{
+    res.json({
+        status:"Failed",
+        message:"Invalid Name Feild"
+    })
+}
+else if(!(emailRegex).test(email))
+{
+    res.json({
+        status:"Failed",
+        message:"Invalid Email Feild"
+    })
+}
+else if(password.length<6 )
+{
+    res.json({
+        status:"Failed",
+        message:"Password should be greater then 6 digits"
+    })
+}
+else if(!no_format.test(phoneNumber)) {
+    res.json({
+        status:"Failed",
+        message:"Phone number is not correct"
+    })
+}
+
+
+else
+{
+    passenger
+    .find({email})
+    .then(result=>{
+        if (result.length)
+        {
+            res.json({
+                status:"Failed",
+                message:"Email already exist"
+           
+            })
+        }
+        else
+        {
+            const updated_passenger = new passenger({ username,phoneNumber, email, password, });
+            updated_passenger.save()
+            .then(result=> {
+                res.status(200).json({
+                    status: 'Success',
+                    message: 'User registered successfully',
+                    data: result
+                  });    
+            })
+
+            .catch(error=>{
+                console.error(error);
+                res.status(500).json({
+                  status: 'Error',
+                  message: 'An error occurred while saving the user'
+                });
+            })
+        }
+    })
+    .catch(err=>{
+        console.log(err)
+        res.json({
+            status:"Failed",
+            message:"Error accured while checking for existing email"
+        })
+    })
+}
+
+})
+
+router.post('/signin',(req,res)=>{
+  
+    if (!req.body) {
+        return res.status(400).json({ error: 'Request body is missing' });
+      }
+    
+      // Extract properties from req.body
+      const { email, password } = req.body;
+      if (!email || !password ) {
+        return res.status(400).json({ error: 'Missing required fields in request body' });
+      }
+      else{
+        passenger.find({email})
+        .then((result)=>
+        {
+            if (result.length)
+            {
+                const hash_pass=result[0].password;
+                bcrypt.compare(password,hash_pass)
+                .then(result1=>{
+                if (result1)  
+                {
+                    res.status(200).json({
+                        status:"Succes",
+                        message:"Signin successfully",
+                        data:result,
+                    })
+                 }
+                 else
+               {
+                    res.status(400).json({
+                        status:"Failed",
+                        message:"Invalid password"
+                    })
+                }
+                })
+                .catch ((error) => {
+                    console.log(error)
+                      res.status(500).json({
+                        status: "Failed",
+                        message: "Error occurred while comparing passwords",
+                      });
+            });
+            }  
+            else{
+                res.status(500).json({
+                    status:"Failed",
+                    message:"Invalid email"
+                })
+             }
+        })
+        .catch( (error) => {
+            console.log(error)
+                res.status(500).json({
+                  status: "Failed",
+                  message: "Error occurred while finding user",
+                });
+              } )
+      }
+    })
+    
+router.get('/', (req, res) => {
+    
+        // Dummy data (replace this with data fetched from your database)
+        passenger.find({})
+        .then(users => {
+            res.json(users);
+            console.log('Users:', users);
+        })
+        .catch(err => {
+            console.error('Error fetching users:', err);
+        });
+       
+      
+        // Send the data as a JSON response
+       
+      });
+module.exports = router;

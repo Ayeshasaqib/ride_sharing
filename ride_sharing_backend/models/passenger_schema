@@ -1,0 +1,36 @@
+// user.js
+const Mongoose = require("mongoose")
+const bcrypt = require('bcrypt');
+const passengerSchema = new Mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+  },
+  phoneNumber: {
+    type: String,
+    required: [true, 'User phone number required'],
+    unique: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  password: {
+    type: String,
+    minlength: 6,
+    required: true,
+  }
+});
+passengerSchema.pre('save', async function(next) {
+  const passenger = this;
+ 
+  const salt = await bcrypt.genSalt(10);
+  const hash = await bcrypt.hash(passenger.password, salt);
+  
+  passenger.password = hash;
+  next();
+});
+const passenger = Mongoose.model('passenger', passengerSchema);
+
+module.exports = passenger;
