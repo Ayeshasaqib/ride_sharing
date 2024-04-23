@@ -69,7 +69,7 @@ else
             updated_passenger.save()
             .then(result=> {
                 res.status(200).json({
-                    status: 'Success',
+                    status: 'SUCCESS',
                     message: 'User registered successfully',
                     data: result
                   });    
@@ -118,7 +118,7 @@ router.post('/signin',(req,res)=>{
                 if (result1)  
                 {
                     res.status(200).json({
-                        status:"Succes",
+                        status:"SUCCESS",
                         message:"Signin successfully",
                         data:result,
                     })
