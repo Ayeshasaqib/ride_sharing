@@ -1,11 +1,12 @@
-import React, {useState} from 'react';
+import React, {useState,useEffect} from 'react';
 import {
   SafeAreaView,
   ScrollView,
   View,
   Text,
   TouchableOpacity,
-  Image
+  Image,
+  LogBox 
 } from 'react-native';
 
 //import DatePicker from 'react-native-date-picker';
@@ -16,14 +17,32 @@ import CustomButton from './CustomButton';
 import logoImage from '../assets/download.jpg';
 import axios from 'axios';
 import IP_ADDRESS from '../config';
-
+import { useRoute } from '@react-navigation/native';
+LogBox.ignoreLogs([
+  'Non-serializable values were found in the navigation state',
+]);
 const RegisterScreen = ({navigation}) => {
+  route=useRoute()
+  const { setAppStatePassenger ,appStatePassenger} = route.params || {}; 
+  const [test, settest] = useState(false);
   const [email, setemail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setusername] = useState('');
   const [contact, setcontact] = useState('');
   const [messagee, setmessagee] = useState('');
   const [statuss, setstatuss] = useState('');
+  
+  useEffect(() => {
+    if (statuss === 'SUCCESS') {
+      route.params.setAppStatePassenger('Signed up')
+      navigation.navigate('PassengerData',
+       { screen: 'Profilee', 
+          params:
+          {email:email,password:password} 
+        });
+    }
+  }, [statuss]);
+  
   const handlesignup =()=>{
     
       console.log(email, password)
@@ -40,20 +59,18 @@ const RegisterScreen = ({navigation}) => {
         const {message, status,data} =result;
         
         console.log(status,message)
-        if (status !=='SUCCESS')
-        { 
-          setmessagee(message)
-          setstatuss(status)
-        }
-        else{
-          ()=>navigation.navigate('Profile')
-        }
+        setmessagee(message)
+        setstatuss(status)
       })
       .catch(error => {
-        console.error('signup failed:', error);
+        setmessagee('Signup Failed:')
+        setstatuss('FAILED')
+        console.log('signup failed:', error);
       });
     }
-  
+  const handleLoginPress = () => {
+          navigation.navigate('Passenger', { screen: 'Login' })
+    };
   
 
   return (
@@ -62,7 +79,7 @@ const RegisterScreen = ({navigation}) => {
         showsVerticalScrollIndicator={false}
         style={{paddingHorizontal: 25}}>
         
-        <View style={{alignItems: 'center', margin:100, marginBottom:0}}>
+        <View style={{alignItems: 'center', margin:30, marginBottom:0}}>
             {/* Using an Image component instead of SVG */}
             <Image
               source={logoImage}
@@ -141,11 +158,11 @@ const RegisterScreen = ({navigation}) => {
           value={password}
           onChangeText={setPassword}
         />
-          <Text style={{ color:'red',  justifyContent: 'center',marginLeft:70, marginBottom: 10, marginTop: 10 }}> 
+          <Text style={{ color:'red',  justifyContent: 'center', marginBottom: 10, marginTop: 10 }}> 
             {statuss}: {messagee}
           </Text>
 
-        <CustomButton label={'Register'} onPress={handlesignup} />
+        <CustomButton label={'Register'} onPress={handlesignup }  />
 
         <View
           style={{
@@ -154,7 +171,7 @@ const RegisterScreen = ({navigation}) => {
             marginBottom: 30,
           }}>
           <Text>Already registered?</Text>
-          <TouchableOpacity onPress={()=>navigation.navigate('Login' )}>
+          <TouchableOpacity onPress={handleLoginPress}>
             <Text style={{color: '#008000', fontWeight: '700'}}> Login</Text>
           </TouchableOpacity>
         </View>

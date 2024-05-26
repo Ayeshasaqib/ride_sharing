@@ -7,23 +7,42 @@ import {
   Text,
   TouchableOpacity,
   Image,
+   LogBox 
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import logoImage from '../assets/download.jpg';
 import CustomButton from './CustomButton';
 import InputField from './InputFeild';
 import axios from 'axios';
 import IP_ADDRESS from '../config';
-
-const LoginScreen = ({navigation}) => {
+import { useRoute } from '@react-navigation/native';
+LogBox.ignoreLogs([
+  'Non-serializable values were found in the navigation state',
+]);
+const LoginScreen = () => {
+  const route = useRoute();
+  //const { setAppStatePassenger ,appStatePassenger} = route.params || {}; 
+  //console.log(route.params.appStatePassenger)
+  const navigation = route.params.navigation;
+  const [test, settest] = useState(false);
   const [email, setemail] = useState('');
   const [password, setPassword] = useState('');
   const [messagee, setmessagee] = useState('');
   const [statuss, setstatuss] = useState('');
+  const [dataa, setdataa] = useState('');
+ 
+  useEffect(() => {
+    if (statuss === 'SUCCESS') {
+      route.params.setAppStatePassenger('Logined');
+      navigation.navigate('PassengerData', {
+        screen: 'Profilee',
+        params: { email: email, password: password }
+      });
+    }
+  }, [statuss, email, password, navigation]);
+  
   const handlelogin =()=>{
-    
-      console.log(email, password)
+    console.log(email,password)
       axios.post( `http://${IP_ADDRESS}:5000/passenger/signin`, {
         email: email,
         password: password
@@ -32,22 +51,20 @@ const LoginScreen = ({navigation}) => {
         
         const result=response.data
         const {message, status,data} =result;
-        
-        console.log(status,message)
-        if (status !=='SUCCESS')
-        { 
-          setmessagee(message)
-          setstatuss(status)
-        }
-        else{
-          ()=>navigation.navigate('Profile')
-        }
+        console.log(status,message,data)
+        setmessagee(message)
+        setstatuss(status)
+        setdataa(data)
       })
       .catch(error => {
-        console.error('Login failed:', error);
+        setmessagee('Login Failed:')
+        setstatuss('FAILED')
+        console.log('Login failed:', error);
       });
     }
-  
+  const handleRegisterPress = () => {
+      navigation.navigate('Passenger', { screen: 'Register' })
+    };
   
   return (
     <KeyboardAvoidingView
@@ -61,7 +78,7 @@ const LoginScreen = ({navigation}) => {
         style={{ backgroundColor: 'white' }}
       >
       
-        <View style={{ alignItems: 'center', marginTop: 60 }}>
+        <View style={{ alignItems: 'center', marginTop: 30 }}>
           <Image source={logoImage} style={{ height: 150, width: 150 , margin:100, marginBottom:0}} />
         </View>
        
@@ -100,14 +117,14 @@ const LoginScreen = ({navigation}) => {
             value={password}
             onChangeText={setPassword}
           />
-          <Text style={{ color:'red',  justifyContent: 'center',marginLeft:70, marginBottom: 10, marginTop: 10 }}> 
-            {statuss}: {messagee}
+          <Text style={{ color:'red',  justifyContent: 'center',marginLeft:10, marginBottom: 10, marginTop: 10 }}> 
+            {statuss} : {messagee}
           </Text>
-          <CustomButton label={"Login"} onPress={handlelogin} />
+          <CustomButton label={"Login"} onPress={handlelogin }/>
 
           <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 30, marginTop: 30 }}>
             <Text>New to the app?</Text>
-            <TouchableOpacity onPress={()=>navigation.navigate('Register' )}>
+            <TouchableOpacity onPress={handleRegisterPress}>
               <Text style={{ color: '#023020', fontWeight: '700', marginLeft: 5 }}>Register</Text>
             </TouchableOpacity>
           </View>

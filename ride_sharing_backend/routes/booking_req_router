@@ -1,0 +1,161 @@
+const express = require('express');
+const mongoose = require('mongoose');
+
+const { ObjectId } = mongoose.Types.ObjectId;
+const BookingRequest = require('../models/booking_req_schema'); 
+
+const router = express.Router();
+
+// Create a new booking request
+router.post('/', async (req, res) => {
+  try {
+    const bookingRequest = new BookingRequest(req.body);
+    if (!req.body) {
+        return res.status(400).json({ error: 'Request body is missing' });
+      }
+     const {fare,destination ,pickupLoc,passengerId,categoryId,driverOfferId} = req.body
+     
+     if (!fare|| !destination || !pickupLoc || !passengerId || !categoryId) {
+        return res.status(400).json({ error: 'Missing required fields in request body' });
+      }
+
+    const savedBookingRequest = await bookingRequest.save()
+    .then(result=> {
+      res.status(200).json({
+          status: 'SUCCESS',
+          message: 'User registered successfully',
+          data: result
+        });    
+  })
+    .catch(error=>{
+      console.error(error);
+      res.status(500).json({
+        status: 'FAILED',
+        message: 'An error occurred while saving the user'
+      });
+  })
+
+    res.status(201).json(savedBookingRequest);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+
+router.get('/', async (req, res) => {
+  try {
+    const bookingRequests = await BookingRequest.find();
+    res.status(200).json({ 
+       status: 'SUCCESS',
+    message: 'Booking Fetched Successfully',
+      data:bookingRequests
+  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: 'FAILED',
+      message: 'An Error Occurred While Fetching the Bookings',
+    });
+  }
+});
+
+
+router.get('/:id', async (req, res) => {
+  try {
+    const ids = req.params.id; // Assuming IDs are passed as query parameters, e.g., ?ids=1,2,3
+    if (!ids) {
+      return res.status(400).json({ status: 'FAILED', message: 'No IDs provided' });
+    }
+    // Find documents with IDs in the provided list
+    await BookingRequest.findById(ids)
+    .then((result)=>{
+      if (result)
+      {
+        return res.status(200).json({
+          status: 'SUCCESS',
+          message: 'Booking Fetched by Id Successfully',
+          data: result
+        });   
+     }
+      else if(!result)
+        {
+          return res.status(404).json({
+            status: 'FAILED',
+            message: 'Booking request not found'
+          });
+        }
+    })
+   
+     
+   
+    
+  } catch (error) {
+    res.status(500).json({ 
+    status: 'FAILED',
+    message: error.message });
+  }
+});
+
+// Update a booking request by ID
+router.put('/:id', async (req, res) => {
+  try {
+    const ids = req.params.id; // Assuming IDs are passed as query parameters, e.g., ?ids=1,2,3
+    if (!ids) {
+      return res.status(400).json({ status: 'FAILED', message: 'No IDs provided' });
+    }
+    // const Id = new ObjectId(ids);
+    await BookingRequest.findByIdAndUpdate(ids, req.body, { new: true, runValidators: true })
+    .then((updatedBookingRequest )=>{
+      if (updatedBookingRequest)
+     { 
+      res.status(200).json({
+        status: 'SUCCESS',
+        message: 'Booking updated Successfully',
+        data: updatedBookingRequest
+      });   
+     }
+      else if (!updatedBookingRequest) 
+        return res.status(404).json({ status: 'FAILED',message: 'Booking request not found' });
+
+    })
+   
+     } 
+  catch (error) {
+    
+    res.status(400).json({
+      status: 'FAILED',
+      message: error.message 
+    });
+  }
+});
+
+// Delete a booking request by ID
+router.delete('/:id', async (req, res) => {
+  try {
+    const ids = req.params.id; // Assuming IDs are passed as query parameters, e.g., ?ids=1,2,3
+    if (!ids) {
+      return res.status(400).json({ status: 'FAILED', message: 'No IDs provided' });
+    }
+     await BookingRequest.findByIdAndDelete(req.params.id)
+    .then((result)=>{
+      if (result)
+      {
+        res.status(200).json({
+        status: 'SUCCESS',
+        message: 'Booking deleted Successfully',
+        data: result
+      });  
+      }
+      else if(!result)
+        {
+          return res.status(404).json({ status:'FAILED',message: 'Booking request not found' });
+        }
+    })
+    
+
+  } catch (error) {
+    res.status(500).json({status:'FAILED1', message: error.message });
+  }
+});
+
+module.exports = router;

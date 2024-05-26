@@ -1,43 +1,58 @@
-// user.js
-const Mongoose = require("mongoose")
-const bcrypt = require('bcrypt');
-const bookingRequestSchema = new Mongoose.Schema({
+const mongoose = require("mongoose");
 
+const bookingRequestSchema = new mongoose.Schema({
   fare: {
-    type: Int16Array,
+    type: Number, // Use Number instead of Int16Array
     required: true,
   },
-
   pickupLoc: {
-    
+    type: {
+      type: String, 
+      enum: ['Point'], 
+      required: true,
+    },
+    coordinates: {
+      type: [Number], 
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true
+    }
   },
-  
-   destination:{
-    
-   },
-   passengerId: {
-    type: Mongoose.Schema.Types.ObjectId,
-    ref: 'passenger' 
-
-  },categoryId: {
-    type: Mongoose.Schema.Types.ObjectId,
-    ref: 'category' 
+  destination: {
+    type: {
+      type: String, 
+      enum: ['Point'], 
+      required: true,
+    },
+    coordinates: {
+      type: [Number], 
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true
+    }
+  },
+  passengerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'passenger',
+    required: true
+  },
+  categoryId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'category',
+    required: true
   },
   driverOfferId: {
-    type: Mongoose.Schema.Types.ObjectId,
-    ref: 'driverOffer' 
-  },
-
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'driverOffer',
+    required: true
+  }
 });
-bookingRequestSchema.pre('save', async function(next) {
-  const bookingRequest = this;
- 
-  const salt = await bcrypt.genSalt(10);
-  const hash = await bcrypt.hash(bookingRequest.password, salt);
-  
-  bookingRequest.password = hash;
-  next();
-});
-const bookingRequest = Mongoose.model('bookingRequest', bookingRequestSchema);
 
-module.exports = bookingRequest;
+
+const BookingRequest = mongoose.model('BookingRequest', bookingRequestSchema);
+
+module.exports = BookingRequest;

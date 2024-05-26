@@ -5,10 +5,10 @@ const Driver = require('../models/driver_schema');
 
 // Signup endpoint for driver
 router.post('/signup', (req, res) => {
-  const { username, phoneNumber, email, password, city } = req.body;
+  const { username, phoneNumber, email, password, city ,rideCategory, rideName, ridePlate } = req.body;
 
   // Validate input fields
-  if (!username || !phoneNumber || !email || !password || !city) {
+  if (!username || !phoneNumber || !email || !password || !city  || !rideCategory || !rideName ||!ridePlate) {
     return res.status(400).json({ error: 'Missing required fields in request body' });
   }
 
@@ -20,7 +20,7 @@ router.post('/signup', (req, res) => {
       }
 
       // Create a new driver instance
-      const newDriver = new Driver({ username, phoneNumber, email, password, city });
+      const newDriver = new Driver({ username, phoneNumber, email, password, city, rideCategory,rideName,ridePlate });
 
       // Hash password before saving to database
       bcrypt.hash(newDriver.password, 10)
@@ -69,7 +69,11 @@ router.post('/signin', (req, res) => {
           if (!match) {
             return res.status(401).json({ error: 'Invalid password' });
           }
-          res.status(200).json({ message: 'Driver signin successful', driver });
+          res.status(200).json({ 
+            status: 'SUCCESS',
+            message: 'Driver signin successful',
+            data:driver
+          });
         })
         .catch(err => {
           console.error('Error comparing passwords:', err);
@@ -93,5 +97,24 @@ router.get('/', (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     });
 });
+
+
+router.get('/:email', (req, res) => {
+  const { email } = req.params;
+
+  // Find driver by email
+  Driver.findOne({ email })
+    .then(driver => {
+      if (!driver) {
+        return res.status(404).json({ error: 'Driver not found' });
+      }
+      res.status(200).json({ driver });
+    })
+    .catch(err => {
+      console.error('Error finding driver:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    });
+});
+
 
 module.exports = router;

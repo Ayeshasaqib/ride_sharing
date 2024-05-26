@@ -1,21 +1,61 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import {React,useState,useEffect} from 'react';
+import { View, Text, StyleSheet, Image,LogBox } from 'react-native';
 import profile from '../assets/profile.jpg'
-const ProfileScreen = ({naviagtion}) => {
-  // Dummy user data (replace with actual user data)
+import { Touchable } from 'react-native';
+import axios from 'axios';
+import IP_ADDRESS from '../config';
+import { useRoute } from '@react-navigation/native';
+LogBox.ignoreLogs([
+  'Non-serializable values were found in the navigation state',
+]);
+
+const ProfileScreen = () => {
+  const route = useRoute();
+  const { email, password } = route.params || {};
+  const [profileData, setProfileData] = useState(null);
+  console.log(email,password)
+  useEffect(() => {
+    if (email && password) {
+      axios.post(`http://${IP_ADDRESS}:5000/passenger/signin`, {
+        email: email,
+        password: password
+      })
+      .then(response => {
+        console.log('Profile data:', response);
+        setProfileData(response)
+      })
+      .catch(error => {
+        console.log('Profile data fetch failed:', error);
+      });
+    }
+  }, [email, password]);
   const user = {
     name: 'John Doe',
     email: 'john.doe@example.com',
-    profilePicture: profile, // Example image path
-    // Add more user data as needed
+    profilePicture: profile, 
   };
 
   return (
     <View style={styles.container}>
-      <Image source={user.profilePicture} style={styles.profilePicture} />
-      <Text style={styles.name}>{user.name}</Text>
-      <Text style={styles.email}>{user.email}</Text>
-      {/* Add more user data here */}
+      {/* Conditionally render profile data if available */}
+      {profileData ? (
+        <>
+          <Image source={profileData.profilePicture} style={styles.profilePicture} />
+          <Text style={styles.name}>{profileData.name}</Text>
+          <Text style={styles.email}>{profileData.email}</Text>
+          {/* ... other profile data */}
+        </>
+      ) : (
+        <>
+          <Image source={user.profilePicture} style={styles.profilePicture} />
+          <Text style={styles.name}>{user.name}</Text>
+          <Text style={styles.email}>{user.email}</Text>
+          {/* <Touchable>
+          <Text style={styles.email}>Logout</Text>
+          </Touchable> */}
+          {/* Add more user data here */}
+        </>
+      )}
     </View>
   );
 };
